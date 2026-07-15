@@ -228,16 +228,27 @@ p.section-lead{
 .day-tab.active{ background: var(--pink); border-color: var(--pink); color:#fff; }
 
 .total-note{ text-align:center; font-size: 12.5px; color: rgba(42,42,46,0.55); }
-.total-label{ font-size: 12px; font-weight:700; letter-spacing:0.08em; color: rgba(42,42,46,0.45); }
 .total-big{
-  font-family:"Zen Maru Gothic", sans-serif; font-weight: 900;
-  font-size: clamp(44px, 15vw, 64px); color: var(--ink); line-height:1.15; margin: 4px 0;
+  font-family:"Zen Maru Gothic", sans-serif; font-weight: 700;
+  font-size: 18px; color: var(--ink); line-height:1.4; margin: 0;
 }
-.total-big .total-unit{ font-size: 20px; margin-left:4px; color: rgba(42,42,46,0.5); }
+.total-sub{ font-size: 13px; color: rgba(42,42,46,0.6); margin-bottom: 10px; }
 .update-tag{
   display:inline-block; margin-top:8px; font-size: 11.5px; font-weight:700;
   color:#fff; background: var(--ink); padding: 5px 14px; border-radius: 999px;
 }
+
+.collected-card{
+  margin-top: 20px; text-align:center;
+  background:#fff; border: 1px dashed var(--teal);
+  border-radius: 18px; padding: 20px 18px;
+}
+.collected-label{ font-size: 12px; font-weight:700; color: var(--teal); letter-spacing:0.02em; }
+.collected-num{
+  font-family:"Zen Maru Gothic", sans-serif; font-weight: 900;
+  font-size: clamp(40px, 14vw, 56px); color: var(--ink); margin-top: 6px;
+}
+.collected-num .total-unit{ font-size: 18px; margin-left:3px; color: rgba(42,42,46,0.5); }
 
 /* ================================================================
    6.「知ってほしいこと」統計セクション
@@ -443,11 +454,14 @@ p.section-lead{
     </div>
 
     <div class="total-note reveal">
-      <div class="total-label">TOTAL VOTES</div>
-      <div class="total-big"><span id="totalCount">0</span><span class="total-unit">個</span></div>
-      集まりました
-      <br>
+      <div class="total-big"><span id="totalCount">0</span>票</div>
+      <div class="total-sub">集まりました</div>
       <span class="update-tag" id="updateTag">更新日</span>
+    </div>
+
+    <div class="collected-card reveal">
+      <div class="collected-label" id="collectedLabel">今日の回収個数</div>
+      <div class="collected-num"><span id="collectedCount">0</span><span class="total-unit">個</span></div>
     </div>
   </div>
 </section>
@@ -614,7 +628,8 @@ p.section-lead{
 
    ・questionText     : その日の質問文
    ・optionA / optionB: 選択肢の文言
-   ・countA / countB  : その日の終わりに数えた「個数」
+   ・countA / countB  : その日の終わりに数えた「投票の個数」
+   ・collectedCount   : その日に実際に回収した空ケースの個数（投票数とは別に入力）
    ・updateLabel      : 更新した日を書く（例："DAY1 終了時点の結果（7/14）"）
 
    currentDay を書き換えると、ページを開いたときに最初に表示される
@@ -629,16 +644,18 @@ const CONFIG = {
       questionText: "推し活現場の鑑賞スタイル",
       optionA: "A. 双眼鏡で細かいところも見る派",
       optionB: "B. 目で焼き付ける派",
-      countA: 8,   // ← DAY1・Aの投票数（個数）
-      countB: 17,   // ← DAY1・Bの投票数（個数）
+      countA: 0,   // ← DAY1・Aの投票数（個数）
+      countB: 0,   // ← DAY1・Bの投票数（個数）
+      collectedCount: 0,   // ← DAY1・実際の回収個数（投票数とは別）
       updateLabel: "DAY1 終了時点の結果"
     },
     2: {
       questionText: "好きな人に想いを伝えるなら",
       optionA: "A. AIが考えた完璧な長文",
       optionB: "B. 自分で考えた一言",
-      countA: 1,   // ← DAY2・Aの投票数（個数）
-      countB: 24,   // ← DAY2・Bの投票数（個数）
+      countA: 0,   // ← DAY2・Aの投票数（個数）
+      countB: 0,   // ← DAY2・Bの投票数（個数）
+      collectedCount: 0,   // ← DAY2・実際の回収個数（投票数とは別）
       updateLabel: "DAY2 終了時点の結果"
     },
     3: {
@@ -647,6 +664,7 @@ const CONFIG = {
       optionB: "B. ゴテゴテなパーツネイル",
       countA: 0,   // ← DAY3・Aの投票数（個数）
       countB: 0,   // ← DAY3・Bの投票数（個数）
+      collectedCount: 0,   // ← DAY3・実際の回収個数（投票数とは別）
       updateLabel: "DAY3 終了時点の結果"
     }
   }
@@ -678,10 +696,12 @@ function renderVoteResult(){
   document.getElementById("labelA").textContent = data.optionA;
   document.getElementById("labelB").textContent = data.optionB;
   document.getElementById("updateTag").textContent = data.updateLabel;
+  document.getElementById("collectedLabel").textContent = "DAY" + activeDay + "の回収個数";
 
   animateCount(document.getElementById("countA"), a);
   animateCount(document.getElementById("countB"), b);
   animateCount(document.getElementById("totalCount"), total);
+  animateCount(document.getElementById("collectedCount"), Number(data.collectedCount) || 0);
 
   animateLensRing(document.getElementById("lensA"), pctA);
   animateLensRing(document.getElementById("lensB"), pctB);
